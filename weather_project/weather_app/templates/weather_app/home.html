@@ -1,11 +1,6 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% block style %}
     <style>
         body {
             background-color: #f8f9fa;
@@ -32,35 +27,51 @@
             border-radius: 15px;
         }
     </style>
-</head>
-<body>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar p-3">
-            <h5 class="text-center">Узнать погоды</h5>
-            <form action="" method="post" class="form-group">
-                {% csrf_token %}
-                {% comment %} {{ form.as_p }} {% endcomment %}
-                <input name="city" class="form-control form-control" type="text" placeholder="Введите город" aria-label="Введите город">
-                <button type="submit" class="btn btn-primary m-2">Отправить</button>
-                <button type="reset" class="btn btn-primary">Очистить</button>
-            </form>
-        </div>
+{% endblock style %}
 
-        <!-- Main content -->
-        <div class="container">
+{% block content %}
+    <!-- Sidebar -->
+    <div class="sidebar p-3">
+        <h5 class="text-center">Узнать погоды</h5>
+        <form action="" method="post" class="form-group">
+            {% csrf_token %}
+            {% comment %} {{ form.as_p }} {% endcomment %}
+            <input id="city" name="city" class="form-control form-control" value="{{histories.0.ru_name}}" type="text" placeholder="Введите город" aria-label="Введите город">
+            <button type="submit" class="btn btn-primary m-2">Отправить</button>
+            <button type="reset" class="btn btn-primary">Очистить</button>
+        </form>
+        <ul class="list-group">
+            {% for history in histories %}
+                <li class="list-group-item">
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="city" value="{{history.city.ru_name}}">
+                        <button class="btn-outline-dark list-group-item list-group-item-action" type="submit" style="border: 0px;">{{history.city.ru_name}}</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Main content -->
+    <div class="container">
+        {% if error_msg %}
+            <div class="card card border-primary m-5 p-5">
+                <h1>{{ error_msg }}</h1>
+            </div>
+        {% else %}
             <div class="d-flex justify-content-center m-4 p-3 card border-primary">
                 <div class="card mb-3 text-bg-primary">
                     <div class="row g-0">
                         <div class="col-md-2">
-                          <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                            <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
                         </div>
                         <div class="col-md-10">
-                          <div class="card-body">
-                            <h4 class="card-title">{{ forecast.name }}, {{forecast.country}}</h4>
-                            <p class="card-text"><h1>{{forecast.current.temperature_2m}} °C</h1></p>
-                            <p class="card-text"><h5>{{forecast.current.cloud_cover}}</h5></p>
-                          </div>
+                            <div class="card-body">
+                                <h4 class="card-title">{{ forecast.name }}, {{forecast.country}}</h4>
+                                <p class="card-text"><h1>{{forecast.current.temperature_2m}} °C</h1></p>
+                                <p class="card-text"><h5>{{forecast.current.cloud_cover}}</h5></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -97,7 +108,7 @@
             </div>
 
             <div class="container">
-                <h3>ПОчасовой прогноз на сегодня</h3>
+                <h3>Почасовой прогноз</h3>
                 <div class="d-flex overflow-x-scroll">
                     {% for temperature in forecast.hourly %}
                         <div class="highlights-card p-3 me-2">
@@ -111,31 +122,55 @@
 
             <h3>Другие города</h3>
             <div class="d-flex mb-4">
-                <div class="other-cities-card p-3 me-2">
-                    <h5>Manchester</h5>
-                    <p>Cloudy. High: 11° Low: 18°</p>
-                    <h3>7°</h3>
-                </div>
-                <div class="other-cities-card p-3 me-2">
-                    <h5>Edinburgh</h5>
-                    <p>Rain. High: 8° Low: 12°</p>
-                    <h3>19°</h3>
-                </div>
-                <div class="other-cities-card p-3 me-2">
-                    <h5>Bristol</h5>
-                    <p>Snow. High: 2° Low: 8°</p>
-                    <h3>22°</h3>
-                </div>
-                <div class="other-cities-card p-3">
-                    <h5>York</h5>
-                    <p>Cloudy. High: 10° Low: 18°</p>
-                    <h3>20°</h3>
-                </div>
+            <div class="other-cities-card p-3 me-2">
+                <h5>Manchester</h5>
+                <p>Cloudy. High: 11° Low: 18°</p>
+                <h3>7°</h3>
             </div>
+            <div class="other-cities-card p-3 me-2">
+                <h5>Edinburgh</h5>
+                <p>Rain. High: 8° Low: 12°</p>
+                <h3>19°</h3>
+            </div>
+            <div class="other-cities-card p-3 me-2">
+                <h5>Bristol</h5>
+                <p>Snow. High: 2° Low: 8°</p>
+                <h3>22°</h3>
+            </div>
+            <div class="other-cities-card p-3">
+                <h5>York</h5>
+                <p>Cloudy. High: 10° Low: 18°</p>
+                <h3>20°</h3>
+            </div>
+            </div>
+        {% endif %}
 
-        </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <script>
+        $(document).ready(function() {
+            $("#city").autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: "{% url 'weather_app:city_autocomplete' %}",
+                        data: {
+                            term: request.term
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            response($.map(data, function(item) {
+                                return {
+                                    label: item.ru_name + " (" + item.en_name + ")",
+                                    value: item.ru_name
+                                };
+                            }));
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function(event, ui) {
+                    console.log("Selected: " + ui.item.value + " aka " + ui.item.id);
+                }
+            });
+        });
+    </script>
+{% endblock content %}
