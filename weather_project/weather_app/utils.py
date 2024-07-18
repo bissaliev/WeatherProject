@@ -12,7 +12,6 @@ def get_coordinates_of_city(city):
     geocode_url = "https://geocoding-api.open-meteo.com/v1/search"
     response = requests.get(geocode_url, params=params, timeout=10)
     data = response.json()
-    print(data)
     results = {
         "name": data.get("name"),
         "latitude": data.get("latitude"),
@@ -23,8 +22,11 @@ def get_coordinates_of_city(city):
     return results
 
 
-def get_weather(latitude=52.52, longitude=13.41, timezone="Europe/Berlin"):
+def get_weather(latitude, longitude, timezone):
     """Получение погоды."""
+    # latitude = 51.5406
+    # longitude = 46.0086
+    # timezone = "Europe/Moscow"
     params = {
         "latitude": latitude,
         "longitude": longitude,
@@ -45,7 +47,6 @@ def get_weather(latitude=52.52, longitude=13.41, timezone="Europe/Berlin"):
     response = requests.get(api_url, params=params, timeout=10)
     if response.status_code == 200:
         data = response.json()
-        print(data)
         hourly = data.get("hourly")
         current = data.get("current")
         forecast = {
@@ -53,3 +54,15 @@ def get_weather(latitude=52.52, longitude=13.41, timezone="Europe/Berlin"):
             "current": current
         }
         return forecast
+
+
+def get_client_ip(request):
+    """
+    Функция для определения IP-адреса пользователя.
+    """
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    return (
+        x_forwarded_for.split(",")[-1].strip()
+        if x_forwarded_for
+        else request.META.get("REMOTE_ADDR")
+    )
