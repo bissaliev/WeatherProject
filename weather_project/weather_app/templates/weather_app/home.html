@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #fff;
+            border-right: 1px solid #dee2e6;
+        }
+        .weather-card {
+            background-color: #e3f2fd;
+            border-radius: 15px;
+        }
+        .highlights-card {
+            background-color: #fff;
+            border-radius: 15px;
+        }
+        .other-cities-card {
+            background-color: #fff;
+            border-radius: 15px;
+        }
+        .temperature-chart {
+            background-color: #fff;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar p-3">
+            <h5 class="text-center">Узнать погоды</h5>
+            <form action="" method="post" class="form-group">
+                {% csrf_token %}
+                {% comment %} {{ form.as_p }} {% endcomment %}
+                <input name="city" class="form-control form-control" type="text" placeholder="Введите город" aria-label="Введите город">
+                <button type="submit" class="btn btn-primary m-2">Отправить</button>
+                <button type="reset" class="btn btn-primary">Очистить</button>
+            </form>
+        </div>
+
+        <!-- Main content -->
+        <div class="container">
+            <div class="d-flex justify-content-center m-4 p-3 card border-primary">
+                <div class="card mb-3 text-bg-primary">
+                    <div class="row g-0">
+                        <div class="col-md-2">
+                          <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                        </div>
+                        <div class="col-md-10">
+                          <div class="card-body">
+                            <h4 class="card-title">{{ forecast.name }}, {{forecast.country}}</h4>
+                            <p class="card-text"><h1>{{forecast.current.temperature_2m}} °C</h1></p>
+                            <p class="card-text"><h5>{{forecast.current.cloud_cover}}</h5></p>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-center align-items-lg-stretch">
+                        <div class="weather-card p-3 m-2 w-25">
+                            <h5>Ощущается как</h5>
+                            <h3>{{forecast.current.apparent_temperature}} °C</h3>
+                        </div>
+                        <div class="weather-card p-3 m-2 w-25">
+                            <h5>Облачность</h5>
+                            <h3>{{forecast.current.cloud_cover}}</h3>
+                        </div>
+                        <div class="weather-card p-3 m-2 w-25">
+                            <h5>Осадки</h5>
+                            <h3>{{forecast.current.precipitation}} мм</h3>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-lg-stretch">
+                        <div class="weather-card p-3 m-2 w-25">
+                            <h5>Влажность</h5>
+                            <h3>{{forecast.current.relative_humidity_2m}} %</h3>
+                        </div>
+                        <div class="weather-card p-3 m-2 w-25">
+                            <h5>Скорость ветра</h5>
+                            <h3>{{forecast.current.wind_speed_10m}} km/h</h3>
+                        </div>
+                        <div class="weather-card p-3 m-2 w-25">
+                            <h5>Направление ветра</h5>
+                            <h3>{{forecast.current.wind_direction_10m}} °</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <h3>ПОчасовой прогноз на сегодня</h3>
+                <div class="d-flex overflow-x-scroll">
+                    {% for temperature in forecast.hourly %}
+                        <div class="highlights-card p-3 me-2">
+                            <small>{{forloop.counter0}}.00</small>
+                            <p>{{ temperature }}°</p>
+                            <p>Sun</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <h3>Другие города</h3>
+            <div class="d-flex mb-4">
+                <div class="other-cities-card p-3 me-2">
+                    <h5>Manchester</h5>
+                    <p>Cloudy. High: 11° Low: 18°</p>
+                    <h3>7°</h3>
+                </div>
+                <div class="other-cities-card p-3 me-2">
+                    <h5>Edinburgh</h5>
+                    <p>Rain. High: 8° Low: 12°</p>
+                    <h3>19°</h3>
+                </div>
+                <div class="other-cities-card p-3 me-2">
+                    <h5>Bristol</h5>
+                    <p>Snow. High: 2° Low: 8°</p>
+                    <h3>22°</h3>
+                </div>
+                <div class="other-cities-card p-3">
+                    <h5>York</h5>
+                    <p>Cloudy. High: 10° Low: 18°</p>
+                    <h3>20°</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
