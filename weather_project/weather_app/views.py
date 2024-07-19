@@ -1,29 +1,29 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.generic import View
 from django.utils import timezone
+from django.db.models import Q
 
 from .models import City, RequestHistory
 from .utils import get_weather, get_client_ip
 
 
-class HomeView(View):
+from django.views.generic import TemplateView
+
+
+class HomeView(TemplateView):
     """Главная страница."""
-    def get(self, request):
-        ip_address = get_client_ip(request)
-        histories = RequestHistory.objects.filter(ip_address=ip_address)[:5]
-        return render(
-            request, "weather_app/home.html", {"histories": histories}
-        )
+    template_name = "weather_app/home.html"
+    extra_context = {"title": "Погода"}
 
     def post(self, request):
         city_name = request.POST.get("city")
-        city = City.objects.get(ru_name=city_name)
-        forecast = get_weather(city.latitude, city.longitude, "Europe/Moscow")
-        forecast |= {
-            "name": city.ru_name,
-            "country": city.timezone
-        }
+        try:
+            city = City.objects.get(ru_name=city_name)
+        except City.DoesNotExist:
+            error_msg = f"Город {city_name} не найдет в базе данных!"
+            return self.render_to_response({"error_msg": error_msg})
+        forecast = get_weather(city.latitude, city.longitude, city.timezone)
+        forecast |= {"name": city.ru_name,}
         ip_address = get_client_ip(request)
         request_history, created = RequestHistory.objects.get_or_create(
             ip_address=ip_address, city=city
@@ -31,20 +31,16 @@ class HomeView(View):
         if not created:
             request_history.created = timezone.now()
             request_history.save()
-        histories = RequestHistory.objects.filter(ip_address=ip_address)[:5]
-        return render(
-            request, "weather_app/home.html",
-            {"forecast": forecast, "histories": histories}
-        )
+        return self.render_to_response({"forecast": forecast})
 
 
 def city_autocomplete(request):
     if "term" in request.GET:
-        qs = (
-            City.objects.filter(en_name__icontains=request.GET.get("term"))
-            | City.objects.filter(ru_name__icontains=request.GET.get("term"))
+        qs = City.objects.filter(
+            Q(en_name__icontains=request.GET.get("term"))
+            | Q(ru_name__icontains=request.GET.get("term"))
         )
-        cities = list(qs.values('ru_name', 'en_name', 'latitude', 'longitude', 'timezone'))
+        cities = list(qs.values('ru_name', 'en_name'))
         return JsonResponse(cities, safe=False)
 
 
