@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load history_tag %}
+
+{% block title %}
+    {{title}}
+{% endblock title %}
+    
 {% block style %}
     <style>
         body {
@@ -15,10 +20,6 @@
             background-color: #e3f2fd;
             border-radius: 15px;
         }
-        .highlights-card {
-            background-color: #fff;
-            border-radius: 15px;
-        }
         .other-cities-card {
             background-color: #fff;
             border-radius: 15px;
@@ -31,7 +32,7 @@
 {% endblock style %}
 
 {% block content %}
-    <!-- Sidebar -->
+    <!-- Форма и истории запросов -->
     <div class="sidebar p-3">
         <h5 class="text-center">Узнать погоду</h5>
         <form action="" method="post" class="form-group">
@@ -42,31 +43,57 @@
         </form>
         <a href="{% url 'weather_app:home' %}" class="btn btn-primary">Обновить</a>
         {% last_cities 5 %}
-    </div>
+    </div>  <!-- Форма и истории запросов -->
 
     <!-- Main content -->
     <div class="container">
+        <!-- Ошибка запроса -->
         {% if error_msg %}
             <div class="card card border-primary m-5 p-5">
                 <h1>{{ error_msg }}</h1>
             </div>
-        {% endif %}
+        {% endif %}  <!-- Ошибка запроса -->
+
         {% if forecast %}
+            <!-- Текущая погода -->
             <div class="d-flex justify-content-center m-4 p-3 card border-primary">
+                <!-- Вверхний раздел -->
                 <div class="card mb-3 text-bg-primary">
                     <div class="row g-0">
                         <div class="col-md-2">
-                            <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                            {% if forecast.current.cloud_cover >= 80 %}
+                                <img src="{% static 'img/overcast@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                            {% elif forecast.current.cloud_cover >= 60 and forecast.current.cloud_cover < 80 %}
+                                <img src="{% static 'img/partly-cloudy@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                            {% elif forecast.current.cloud_cover >= 30 and forecast.current.cloud_cover < 60 %}
+                                <img src="{% static 'img/mostly-clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                            {% else %}
+                                <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                            {% endif %}
                         </div>
                         <div class="col-md-10">
                             <div class="card-body">
                                 <h4 class="card-title">{{ forecast.name }}</h4>
                                 <p class="card-text"><h1>{{forecast.current.temperature_2m}} °C</h1></p>
-                                <p class="card-text"><h5>{{forecast.current.cloud_cover}}</h5></p>
+                                <p class="card-text">
+                                    <h5>
+                                        {% if forecast.current.cloud_cover >= 80 %}
+                                            Облачно, облачная погода
+                                        {% elif forecast.current.cloud_cover >= 60 and forecast.current.cloud_cover < 80 %}
+                                            Облачно с прояснениями
+                                        {% elif forecast.current.cloud_cover >= 30 and forecast.current.cloud_cover < 60 %}
+                                            Переменная (меняющаяся) облачность
+                                        {% else %}
+                                            Ясно, ясная погода, малооблачно
+                                        {% endif %}
+                                    </h5>
+                                </p>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>  <!-- Вверхний раздел -->
+
+                <!-- Параметры -->
                 <div class="d-flex flex-column">
                     <div class="d-flex justify-content-center align-items-lg-stretch">
                         <div class="weather-card p-3 m-2 w-25">
@@ -96,21 +123,32 @@
                             <h3>{{forecast.current.wind_direction_10m}} °</h3>
                         </div>
                     </div>
-                </div>
-            </div>
+                </div>  <!-- Параметры -->
 
-            <div class="container">
-                <h3>Почасовой прогноз</h3>
-                <div class="d-flex overflow-x-scroll">
-                    {% for temperature in forecast.hourly %}
-                        <div class="highlights-card p-3 me-2">
-                            <small>{{forloop.counter0}}.00</small>
-                            <p>{{ temperature }}°</p>
-                            <p>Sun</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
+                <!-- Почасовой прогноз -->
+                <div class="container mt-2">
+                    <h3>Почасовой прогноз</h3>
+                    <div class="d-flex overflow-x-scroll">
+                        <ul class="list-group list-group-horizontal">
+                            {% for hour in forecast.hourly  %}
+                                <li class="list-group-item list-group-item-primary text-center">
+                                    <span class="">{{forloop.counter0}}.00</span>
+                                    {% if hour.1 >= 80 %}
+                                        <img src="{% static 'img/overcast@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                                    {% elif hour.1 >= 60 and hour.1 < 80 %}
+                                        <img src="{% static 'img/partly-cloudy@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                                    {% elif hour.1 >= 30 and hour.1 < 40 %}
+                                        <img src="{% static 'img/mostly-clear@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                                    {% else %}
+                                        <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                                    {% endif %}
+                                    <span class="badge bg-primary rounded-pill" style="font-size: larger;">{{ hour.0 }}°</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>  <!-- Почасовой прогноз -->
+            </div>  <!-- Текущая погода -->
 
             <h3>Другие города</h3>
             <div class="d-flex mb-4">
@@ -138,6 +176,7 @@
         {% else %}
             <div class="d-flex justify-content-center m-5 p-5 card border-primary">
                 <h1>Введите город, чтобы узнать погоду в нужном городе!</h1>
+                {% last_cities %}
             </div>
         {% endif %}
 
