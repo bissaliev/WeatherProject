@@ -1,32 +1,9 @@
 import requests
 
 
-def get_coordinates_of_city(city):
-    """Получение координат по названию города."""
-    params = {
-        "name": city,
-        "count": 1,
-        "language": "ru",
-        "format": "json"
-    }
-    geocode_url = "https://geocoding-api.open-meteo.com/v1/search"
-    response = requests.get(geocode_url, params=params, timeout=10)
-    data = response.json()
-    results = {
-        "name": data.get("name"),
-        "latitude": data.get("latitude"),
-        "longitude": data.get("longitude"),
-        "timezone": data.get("timezone"),
-        "country": data.get("country"),
-    }
-    return results
-
-
 def get_weather(latitude, longitude, timezone):
     """Получение погоды."""
-    # latitude = 51.5406
-    # longitude = 46.0086
-    # timezone = "Europe/Moscow"
+
     params = {
         "latitude": latitude,
         "longitude": longitude,
