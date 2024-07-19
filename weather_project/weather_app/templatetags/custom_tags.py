@@ -18,3 +18,8 @@ def last_cities(context, count=5):
     cities = City.objects.filter(
         id__in=Subquery(city_ids)).order_by("-history__created")
     return {"cities": cities}
+
+@register.filter
+def index(lst, i):
+    """Фильтр для получения элемента списка по индексу."""
+    return lst[i]

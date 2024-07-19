@@ -1,0 +1,33 @@
+{% load static %}
+{% load custom_tags %}
+
+{% for day, data in forecast.weather_by_day.items %}
+    <!-- Почасовой прогноз -->
+    <div class="container mt-2">
+        <h3>{{day}}</h3>
+        <div class="d-flex overflow-x-scroll">
+            <ul class="list-group list-group-horizontal">
+                <!-- Итерация по количеству часов -->
+                {% for _ in data.time %}
+                    <li class="list-group-item list-group-item-primary text-center">
+                        <span class="">{{forloop.counter0}}.00</span>
+                        
+                        {% with data.cloud_cover|index:forloop.counter0 as cloud_cover %}
+                            
+                        {% if cloud_cover >= 80 %}
+                            <img src="{% static 'img/overcast@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                        {% elif cloud_cover >= 60 and cloud_cover < 80 %}
+                            <img src="{% static 'img/partly-cloudy@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                        {% elif cloud_cover >= 30 and cloud_cover < 40 %}
+                            <img src="{% static 'img/mostly-clear@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                        {% else %}
+                            <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start" alt="...">
+                        {% endif %}
+                        {% endwith %}
+                        <span class="badge bg-primary rounded-pill" style="font-size: larger;">{{data.temperature_2m|index:forloop.counter0 }} °</span>
+                    </li>
+                {% endfor %}  <!-- Итерация по количеству часов -->
+            </ul>
+        </div>
+    </div>
+{% endfor %}  <!-- Итерация по количеству дней -->
