@@ -3,6 +3,8 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 
+handler404 = "weather_app.views.page_not_found"
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("weather_app.urls", namespace="weather_app")),
