@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load history_tag %}
 {% block style %}
     <style>
         body {
@@ -32,25 +33,15 @@
 {% block content %}
     <!-- Sidebar -->
     <div class="sidebar p-3">
-        <h5 class="text-center">Узнать погоды</h5>
+        <h5 class="text-center">Узнать погоду</h5>
         <form action="" method="post" class="form-group">
             {% csrf_token %}
-            {% comment %} {{ form.as_p }} {% endcomment %}
-            <input id="city" name="city" class="form-control form-control" value="{{histories.0.ru_name}}" type="text" placeholder="Введите город" aria-label="Введите город">
+            <input id="city" name="city" class="form-control form-control" type="text" placeholder="Введите город" aria-label="Введите город">
             <button type="submit" class="btn btn-primary m-2">Отправить</button>
             <button type="reset" class="btn btn-primary">Очистить</button>
         </form>
-        <ul class="list-group">
-            {% for history in histories %}
-                <li class="list-group-item">
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="city" value="{{history.city.ru_name}}">
-                        <button class="btn-outline-dark list-group-item list-group-item-action" type="submit" style="border: 0px;">{{history.city.ru_name}}</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
+        <a href="{% url 'weather_app:home' %}" class="btn btn-primary">Обновить</a>
+        {% last_cities 5 %}
     </div>
 
     <!-- Main content -->
@@ -59,7 +50,8 @@
             <div class="card card border-primary m-5 p-5">
                 <h1>{{ error_msg }}</h1>
             </div>
-        {% else %}
+        {% endif %}
+        {% if forecast %}
             <div class="d-flex justify-content-center m-4 p-3 card border-primary">
                 <div class="card mb-3 text-bg-primary">
                     <div class="row g-0">
@@ -68,7 +60,7 @@
                         </div>
                         <div class="col-md-10">
                             <div class="card-body">
-                                <h4 class="card-title">{{ forecast.name }}, {{forecast.country}}</h4>
+                                <h4 class="card-title">{{ forecast.name }}</h4>
                                 <p class="card-text"><h1>{{forecast.current.temperature_2m}} °C</h1></p>
                                 <p class="card-text"><h5>{{forecast.current.cloud_cover}}</h5></p>
                             </div>
@@ -142,6 +134,10 @@
                 <p>Cloudy. High: 10° Low: 18°</p>
                 <h3>20°</h3>
             </div>
+            </div>
+        {% else %}
+            <div class="d-flex justify-content-center m-5 p-5 card border-primary">
+                <h1>Введите город, чтобы узнать погоду в нужном городе!</h1>
             </div>
         {% endif %}
 
