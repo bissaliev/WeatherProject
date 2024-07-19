@@ -16,7 +16,8 @@ def get_weather(latitude, longitude, timezone):
             "wind_speed_10m",
             "wind_direction_10m"
         ],
-        "hourly": "temperature_2m",
+        "hourly": ["temperature_2m", "cloud_cover"],
+        "daily": ["temperature_2m_max", "precipitation_hours", "wind_direction_10m_dominant"],
         "timezone": timezone,
         "forecast_days": 1
     }
@@ -24,10 +25,11 @@ def get_weather(latitude, longitude, timezone):
     response = requests.get(api_url, params=params, timeout=10)
     if response.status_code == 200:
         data = response.json()
+        print(data)
         hourly = data.get("hourly")
         current = data.get("current")
         forecast = {
-            "hourly": hourly.get("temperature_2m"),
+            "hourly": zip(hourly.get("temperature_2m"), hourly.get("cloud_cover")),
             "current": current
         }
         return forecast
