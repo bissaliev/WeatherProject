@@ -37,7 +37,7 @@ python3 -m venv venv
 Активировать виртуальное окружение:
 
 ```bash
-. venv/bin/activate
+source venv/bin/activate
 ```
 
 Установить зависимости:
@@ -46,7 +46,7 @@ python3 -m venv venv
 pip install -r requirements.txt
 ```
 
-Перейти в директорию `weather_app`:
+Перейти в директорию `weather_project`:
 
 ```bash
 cd weather_app/
@@ -62,6 +62,12 @@ python3 manage.py migrate
 
 ```bash
 python3 manage.py loaddata fixtures/cities.json
+```
+
+Запустить тесты:
+
+```bash
+python3 manage.py test
 ```
 
 Запустить проект в виртуальном окружение:
@@ -93,7 +99,13 @@ docker exec weather_app python3 manage.py migrate
 Загрузить фикстуры для модели `City`:
 
 ```bash
-docker exec python3 manage.py loaddata fixtures/cities.json
+docker exec weather_app python3 manage.py loaddata fixtures/cities.json
+```
+
+Запустить тесты:
+
+```bash
+docker exec weather_app python3 manage.py test
 ```
 
 ## Автор
