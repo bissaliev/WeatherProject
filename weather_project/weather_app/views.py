@@ -1,7 +1,8 @@
+from typing import Any, Dict, Optional
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.utils import timezone
 from django.db.models import Q
+from django.core.cache import cache
 
 from .models import City, RequestHistory
 from .utils import get_weather, get_client_ip
@@ -15,26 +16,65 @@ class HomeView(TemplateView):
     template_name = "weather_app/home.html"
     extra_context = {"title": "Погода"}
 
-    def post(self, request):
-        city_name = request.POST.get("city")
-        try:
-            city = City.objects.get(ru_name=city_name)
-        except City.DoesNotExist:
-            error_msg = f"Город {city_name} не найдет в базе данных!"
-            return self.render_to_response({"error_msg": error_msg})
-        forecast = get_weather(city.latitude, city.longitude, city.timezone)
-        forecast |= {"name": city.ru_name,}
-        ip_address = get_client_ip(request)
-        request_history, created = RequestHistory.objects.get_or_create(
-            ip_address=ip_address, city=city
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        city_name = self.request.POST.get("city")
+        if city_name:
+            city = self.get_city(city_name)
+            if not city:
+                context["error_msg"] = f"Город {city_name} не найдет в базе данных!"
+            else:
+                forecast = self.get_forecast(city)
+                context["forecast"] = forecast
+                self.update_history(city)
+        return context
+
+    def get_city(self, city_name: str) -> Optional[City]:
+        """
+        Получаем город из базы данных или из кеша, обновляющийся каждые 15 минут.
+        """
+
+        cache_key = f"city_{city_name}"
+        city = cache.get(cache_key)
+        if not city:
+            try:
+                city = City.objects.get(ru_name=city_name)
+            except City.DoesNotExist:
+                return None
+            cache.set(cache_key, city, 15 * 60)  # 15 минут
+        return city
+
+    def get_forecast(self, city: City) -> Dict[str, Any]:
+        """
+        Получаем прогноз погоды по городу из сервера погоды или из кеша,
+        обновляющийся каждые 15 минут.
+        """
+
+        cache_key = f"forecast_{city.ru_name}"
+        forecast = cache.get(cache_key)
+        if not forecast:
+            forecast = get_weather(
+                city.latitude, city.longitude, city.timezone)
+            forecast |= {"name": city.ru_name}
+            cache.set(cache_key, forecast, 15 * 60)  # 15 минут
+        return forecast
+
+    def update_history(self, city: City) -> None:
+        """Сохраняем или обновляем информацию о запросе в базу данных."""
+
+        ip_address = get_client_ip(self.request)
+        RequestHistory.objects.update_or_create(
+            ip_address=ip_address, city=city,
+            defaults={"created": timezone.now()}
         )
-        if not created:
-            request_history.created = timezone.now()
-            request_history.save()
-        return self.render_to_response({"forecast": forecast})
+
+    def post(self, request, *args, **kwargs):
+        return self.get(request, *args, **kwargs)
 
 
-def city_autocomplete(request):
+def city_autocomplete(request) -> JsonResponse:
+    """Функция представления для автокомплита."""
+
     if "term" in request.GET:
         qs = City.objects.filter(
             Q(en_name__icontains=request.GET.get("term"))
@@ -42,7 +82,3 @@ def city_autocomplete(request):
         )
         cities = list(qs.values('ru_name', 'en_name'))
         return JsonResponse(cities, safe=False)
-
-
-def page_not_found(request, exception):
-    return render(request, "core/404.html", {"path": request.path}, status=404)
