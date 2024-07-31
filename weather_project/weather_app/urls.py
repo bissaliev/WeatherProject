@@ -1,4 +1,5 @@
 from django.urls import path
+
 from weather_app import views
 
 app_name = "weather_app"
@@ -8,5 +9,4 @@ urlpatterns = [
     path(
         "city-autocomplete/", views.city_autocomplete, name="city_autocomplete"
     ),
-    path("hello/", views.hello),
 ]
