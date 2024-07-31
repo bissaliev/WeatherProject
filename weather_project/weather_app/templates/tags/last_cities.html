@@ -2,15 +2,16 @@
     <h4>История запросов</h4>
     <ul class="list-group mt-2">
         {% if cities %}
-            {% for city in cities %}
-                <li class="list-group-item">
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="city" value="{{city.ru_name}}">
-                        <button class="btn-outline-dark list-group-item list-group-item-action" type="submit" style="border: 0px;">{{city.ru_name}}</button>
-                    </form>
-                </li>
-            {% endfor %}
+        {% for city in cities %}
+        <li class="list-group-item">
+            <form action="" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="city" value="{{ city }}">
+                <button class="btn-outline-dark list-group-item list-group-item-action" type="submit"
+                    style="border: 0px;">{{ city }}</button>
+            </form>
+        </li>
+        {% endfor %}
         {% endif %}
     </ul>
 </div>
