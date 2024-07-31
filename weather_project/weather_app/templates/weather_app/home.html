@@ -3,7 +3,7 @@
 {% load custom_tags %}
 
 {% block title %}{{title}}{% endblock title %}
-    
+
 {% block style %}
     <style>
         body {
@@ -25,6 +25,7 @@
     <!-- Форма и истории запросов -->
     <div class="sidebar p-3">
         <h5 class="text-center">Узнать погоду</h5>
+        <a href="{% url 'admin:index' %}">Admin</a>
         <form action="" method="post" class="form-group">
             {% csrf_token %}
             <input id="city" name="city" class="form-control form-control" type="text" placeholder="Введите город" aria-label="Введите город">
