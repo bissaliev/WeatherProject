@@ -1,8 +1,10 @@
 def last_city_middleware(get_response):
+    """Middleware для добавления запрошенных городов в сессии."""
+
     def middleware(request):
-        city_name = request.POST.get("city")
         response = get_response(request)
-        if city_name:
+        city_name = request.POST.get("city")
+        if city_name and ("error_msg" not in response.context_data):
             previous_cities = list(
                 dict.fromkeys(
                     [city_name] + request.session.get("previous_cities", [])
