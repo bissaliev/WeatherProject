@@ -3,11 +3,10 @@ from typing import Any, Dict, Optional
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import JsonResponse
-from django.utils import timezone
 from django.views.generic import TemplateView
 
-from .models import City, RequestHistory
-from .utils import get_client_ip, get_weather
+from .models import City
+from .utils import get_weather
 
 
 class HomeView(TemplateView):
@@ -28,7 +27,6 @@ class HomeView(TemplateView):
             else:
                 forecast = self.get_forecast(city)
                 context["forecast"] = forecast
-                self.update_history(city)
         return context
 
     def get_city(self, city_name: str) -> Optional[City]:
@@ -61,16 +59,6 @@ class HomeView(TemplateView):
             forecast |= {"name": city.ru_name}
             cache.set(cache_key, forecast, 15 * 60)  # 15 минут
         return forecast
-
-    def update_history(self, city: City) -> None:
-        """Сохраняем или обновляем информацию о запросе в базу данных."""
-
-        ip_address = get_client_ip(self.request)
-        RequestHistory.objects.update_or_create(
-            ip_address=ip_address,
-            city=city,
-            defaults={"created": timezone.now()},
-        )
 
     def post(self, request, *args, **kwargs):
         return self.get(request, *args, **kwargs)
