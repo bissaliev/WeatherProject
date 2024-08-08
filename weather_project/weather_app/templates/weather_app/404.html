@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Custom 404{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12 justify-content-center align-items-center h-100">
+            <div class="card border-primary text-center m-lg-5 m-2" style="height: 40rem;">
+                <h1 class="card-header">
+                    Custom 404
+                </h1>
+                <div class="card-body">
+                    <h3 class="card-title">Custom 404</h3>
+                    <h3 class="card-text">Что-то пошло не так. Попробуйте снова</h3>
+                    <a href="{% url 'weather_app:home' %}" class="btn btn-primary">Вернуться</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
