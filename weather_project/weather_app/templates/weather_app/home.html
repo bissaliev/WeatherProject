@@ -2,158 +2,174 @@
 {% load static %}
 {% load custom_tags %}
 
-{% block title %}{{title}}{% endblock title %}
+{% block title %}{{ title }}{% endblock title %}
 
 {% block style %}
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            height: 100vh;
-            background-color: #fff;
-            border-right: 1px solid #dee2e6;
-        }
-        .weather-card {
-            background-color: #e3f2fd;
-            border-radius: 15px;
-        }
-    </style>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .sidebar {
+        height: 100vh;
+        background-color: #fff;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .weather-card {
+        background-color: #e3f2fd;
+        border-radius: 15px;
+    }
+</style>
 {% endblock style %}
 
 {% block content %}
-    <!-- Форма и истории запросов -->
-    <div class="sidebar p-3">
+<!-- Форма и истории запросов -->
+<div class="sidebar p-3">
+    <div class="d-flex justify-content-around align-items-center m-1">
+        <a href="{% url 'weather_app:home' %}" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-fill"
+                viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                    d="m8 3.293 6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z" />
+                <path fill-rule="evenodd"
+                    d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z" />
+            </svg>
+        </a>
         <h5 class="text-center">Узнать погоду</h5>
-        <a href="{% url 'admin:index' %}">Admin</a>
-        <form action="" method="post" class="form-group">
-            {% csrf_token %}
-            <input id="city" name="city" class="form-control form-control" type="text" placeholder="Введите город" aria-label="Введите город">
-            <button type="submit" class="btn btn-primary m-2">Отправить</button>
-            <button type="reset" class="btn btn-primary">Очистить</button>
-        </form>
-        <a href="{% url 'weather_app:home' %}" class="btn btn-primary">Обновить</a>
-        {% last_cities 5 %}
-    </div>  <!-- Форма и истории запросов -->
-
-    <!-- Main content -->
-    <div class="container">
-        <!-- Ошибка запроса -->
-        {% if error_msg %}
-            <div class="card card border-primary m-5 p-5">
-                <h1>{{ error_msg }}</h1>
-            </div>
-        {% endif %}  <!-- Ошибка запроса -->
-
-        {% if forecast %}
-            <!-- Текущая погода -->
-            <div class="d-flex justify-content-center m-4 p-3 card border-primary">
-                <!-- Вверхний раздел -->
-                <div class="card mb-3 text-bg-primary">
-                    <div class="row g-0">
-                        <div class="col-md-2">
-                            {% if forecast.current.cloud_cover >= 80 %}
-                                <img src="{% static 'img/overcast@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
-                            {% elif forecast.current.cloud_cover >= 60 and forecast.current.cloud_cover < 80 %}
-                                <img src="{% static 'img/partly-cloudy@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
-                            {% elif forecast.current.cloud_cover >= 30 and forecast.current.cloud_cover < 60 %}
-                                <img src="{% static 'img/mostly-clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
-                            {% else %}
-                                <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
-                            {% endif %}
-                        </div>
-                        <div class="col-md-10">
-                            <div class="card-body">
-                                <h4 class="card-title">{{ forecast.name }}</h4>
-                                <p class="card-text"><h1>{{forecast.current.temperature_2m}} °C</h1></p>
-                                <p class="card-text">
-                                    <h5>
-                                        {% if forecast.current.cloud_cover >= 80 %}
-                                            Облачно, облачная погода
-                                        {% elif forecast.current.cloud_cover >= 60 and forecast.current.cloud_cover < 80 %}
-                                            Облачно с прояснениями
-                                        {% elif forecast.current.cloud_cover >= 30 and forecast.current.cloud_cover < 60 %}
-                                            Переменная (меняющаяся) облачность
-                                        {% else %}
-                                            Ясно, ясная погода, малооблачно
-                                        {% endif %}
-                                    </h5>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>  <!-- Вверхний раздел -->
-
-                <!-- Параметры -->
-                <div class="d-flex flex-column">
-                    <div class="d-flex justify-content-center align-items-lg-stretch">
-                        <div class="weather-card p-3 m-2 w-25">
-                            <h5>Ощущается как</h5>
-                            <h3>{{forecast.current.apparent_temperature}} °C</h3>
-                        </div>
-                        <div class="weather-card p-3 m-2 w-25">
-                            <h5>Облачность</h5>
-                            <h3>{{forecast.current.cloud_cover}}</h3>
-                        </div>
-                        <div class="weather-card p-3 m-2 w-25">
-                            <h5>Осадки</h5>
-                            <h3>{{forecast.current.precipitation}} мм</h3>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-center align-items-lg-stretch">
-                        <div class="weather-card p-3 m-2 w-25">
-                            <h5>Влажность</h5>
-                            <h3>{{forecast.current.relative_humidity_2m}} %</h3>
-                        </div>
-                        <div class="weather-card p-3 m-2 w-25">
-                            <h5>Скорость ветра</h5>
-                            <h3>{{forecast.current.wind_speed_10m}} km/h</h3>
-                        </div>
-                        <div class="weather-card p-3 m-2 w-25">
-                            <h5>Направление ветра</h5>
-                            <h3>{{forecast.current.wind_direction_10m}} °</h3>
-                        </div>
-                    </div>
-                </div>  <!-- Параметры -->
-            </div>
-
-            <!-- Погода по дням -->
-            {% include 'weather_app/weather_of_days.html' %}
-            <!-- Погода по дням -->
-
-        {% else %}
-            <div class="d-flex justify-content-center m-5 p-5 card border-primary">
-                <h1>Введите город, чтобы узнать погоду в нужном городе!</h1>
-                {% last_cities %}
-            </div>
-        {% endif %}
-
     </div>
-    <script>
-        $(document).ready(function() {
-            $("#city").autocomplete({
-                source: function(request, response) {
-                    $.ajax({
-                        url: "{% url 'weather_app:city_autocomplete' %}",
-                        data: {
-                            term: request.term
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            response($.map(data, function(item) {
-                                return {
-                                    label: item.ru_name + " (" + item.en_name + ")",
-                                    value: item.ru_name
-                                };
-                            }));
-                        }
-                    });
-                },
-                minLength: 2,
-                select: function(event, ui) {
-                    console.log("Selected: " + ui.item.value + " aka " + ui.item.id);
-                }
-            });
+    <form action="" method="post" class="form-group">
+        {% csrf_token %}
+        <input id="city" name="city" class="form-control form-control" type="text" placeholder="Введите город"
+            aria-label="Введите город">
+        <button type="submit" class="btn btn-primary m-2">Отправить</button>
+        <button type="reset" class="btn btn-primary">Очистить</button>
+    </form>
+    {% last_cities 5 %}
+</div> <!-- Форма и истории запросов -->
+
+<!-- Main content -->
+<div class="container">
+    <!-- Ошибка запроса -->
+    {% if error_msg %}
+    <div class="card card border-primary m-5 p-5">
+        <h1>{{ error_msg }}</h1>
+    </div>
+    {% endif %}
+    <!-- Ошибка запроса -->
+
+    {% if forecast %}
+    <!-- Текущая погода -->
+    <div class="d-flex justify-content-center m-4 p-3 card border-primary">
+        <!-- Вверхний раздел -->
+        <div class="card mb-3 text-bg-primary">
+            <div class="row g-0">
+                <div class="col-md-2">
+                    {% if forecast.current.cloud_cover >= 80 %}
+                    <img src="{% static 'img/overcast@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                    {% elif forecast.current.cloud_cover >= 60 and forecast.current.cloud_cover < 80 %}
+                    <img src="{% static 'img/partly-cloudy@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                    {% elif forecast.current.cloud_cover >= 30 and forecast.current.cloud_cover < 60 %}
+                    <img src="{% static 'img/mostly-clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                    {% else %}
+                    <img src="{% static 'img/clear@4x.png' %}" class="img-fluid rounded-start m-3" alt="...">
+                    {% endif %}
+                </div>
+                <div class="col-md-10">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ forecast.name }}</h4>
+                        <p class="card-text">
+                            <h1>{{ forecast.current.temperature_2m }} °C</h1>
+                        </p>
+                        <p class="card-text">
+                            <h5>
+                                {% if forecast.current.cloud_cover >= 80 %}
+                                Облачно, облачная погода
+                                {% elif forecast.current.cloud_cover >= 60 and forecast.current.cloud_cover < 80 %}
+                                Облачно с прояснениями
+                                {% elif forecast.current.cloud_cover >= 30 and forecast.current.cloud_cover < 60 %}
+                                Переменная (меняющаяся) облачность
+                                {% else %}
+                                Ясно, ясная погода, малооблачно
+                                {% endif %}
+                            </h5>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Вверхний раздел -->
+
+        <!-- Параметры -->
+        <div class="d-flex flex-column">
+            <div class="d-flex justify-content-center align-items-lg-stretch">
+                <div class="weather-card p-3 m-2 w-25">
+                    <h5>Ощущается как</h5>
+                    <h3>{{ forecast.current.apparent_temperature }} °C</h3>
+                </div>
+                <div class="weather-card p-3 m-2 w-25">
+                    <h5>Облачность</h5>
+                    <h3>{{ forecast.current.cloud_cover }}</h3>
+                </div>
+                <div class="weather-card p-3 m-2 w-25">
+                    <h5>Осадки</h5>
+                    <h3>{{ forecast.current.precipitation }} мм</h3>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center align-items-lg-stretch">
+                <div class="weather-card p-3 m-2 w-25">
+                    <h5>Влажность</h5>
+                    <h3>{{ forecast.current.relative_humidity_2m }} %</h3>
+                </div>
+                <div class="weather-card p-3 m-2 w-25">
+                    <h5>Скорость ветра</h5>
+                    <h3>{{ forecast.current.wind_speed_10m }} km/h</h3>
+                </div>
+                <div class="weather-card p-3 m-2 w-25">
+                    <h5>Направление ветра</h5>
+                    <h3>{{ forecast.current.wind_direction_10m }} °</h3>
+                </div>
+            </div>
+        </div> <!-- Параметры -->
+    </div>
+
+    <!-- Погода по дням -->
+    {% include 'weather_app/weather_of_days.html' %}
+    <!-- Погода по дням -->
+
+    {% else %}
+    <div class="d-flex justify-content-center m-5 p-5 card border-primary">
+        <h1>Введите город, чтобы узнать погоду в нужном городе!</h1>
+        {% last_cities %}
+    </div>
+    {% endif %}
+
+</div>
+<script>
+    $(document).ready(function () {
+        $("#city").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "{% url 'weather_app:city_autocomplete' %}",
+                    data: {
+                        term: request.term
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.ru_name + " (" + item.en_name +
+                                    ")",
+                                value: item.ru_name
+                            };
+                        }));
+                    }
+                });
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                console.log("Selected: " + ui.item.value + " aka " + ui.item.id);
+            }
         });
-    </script>
+    });
+</script>
 {% endblock content %}
